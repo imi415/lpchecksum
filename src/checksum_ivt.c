@@ -100,7 +100,7 @@ static int lpcc_ivt_get_header(Elf *handle, uint32_t *ivt) {
         return -1;
     }
 
-    Elf_Data *ivt_data = elf_getdata(ivt_scn, NULL);
+    Elf_Data *ivt_data = elf_rawdata(ivt_scn, NULL);
     if (ivt_data == NULL) {
         int errsv = elf_errno();
         LPCC_LOG_ERROR("Failed to get IVT section content, %s", elf_errmsg(errsv));
@@ -128,7 +128,7 @@ static int lpcc_ivt_write_checksum(Elf *handle, uint32_t checksum) {
         return -1;
     }
 
-    Elf_Data *ivt_data = elf_getdata(ivt_scn, NULL);
+    Elf_Data *ivt_data = elf_rawdata(ivt_scn, NULL);
     if (ivt_data == NULL) {
         int errsv = elf_errno();
         LPCC_LOG_ERROR("Failed to get IVT section content, %s", elf_errmsg(errsv));
@@ -145,16 +145,6 @@ static int lpcc_ivt_write_checksum(Elf *handle, uint32_t checksum) {
     }
 
     ((uint32_t *)ivt_data->d_buf)[7] = checksum;
-
-    if (elf_flagdata(ivt_data, ELF_C_SET, ELF_F_DIRTY) < 0) {
-        int errsv = elf_errno();
-        LPCC_LOG_ERROR("IVT data flag error, %s", elf_errmsg(errsv));
-    }
-
-    if (elf_update(handle, ELF_C_WRITE_MMAP) < 0) {
-        int errsv = elf_errno();
-        LPCC_LOG_ERROR("elf update error, %s", elf_errmsg(errsv));
-    }
 }
 
 static uint32_t lpcc_calculate_checksum(uint32_t *ivt) {
@@ -185,7 +175,7 @@ int lpcc_checksum_ivt_append(const char *elf_path) {
     elf_version(EV_CURRENT);
 
     /* Get libelf handle for the file opened, return -2 if error occurs. */
-    Elf *e_handle = elf_begin(elf_fd, ELF_C_RDWR, NULL);
+    Elf *e_handle = elf_begin(elf_fd, ELF_C_RDWR_MMAP, NULL);
     if (e_handle == NULL) {
         int errsv = elf_errno();
         LPCC_LOG_ERROR("ELF parse failed, %s", elf_errmsg(errsv));
