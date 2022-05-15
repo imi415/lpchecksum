@@ -4,7 +4,7 @@ This is a simple CLI utility for NXP LPC series MCUs.
 These MCUs utilizes a reserved word in IVT, located at `0x1C` for Cortex-M,
 contains a checksum for the first 7 words of the IVT.
 
-This is done by adding the first 8 words together, if the result is 0, the
+The verification is done by adding the first 8 words together, if the result is 0, the
 bootloader will jumps to the user application, otherwise ISP mode will be activated.
 
 ## Dependencies
